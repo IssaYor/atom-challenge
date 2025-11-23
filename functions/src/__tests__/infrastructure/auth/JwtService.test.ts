@@ -4,7 +4,7 @@ describe("JwtService", () => {
   let jwtService: JwtService;
 
   beforeEach(() => {
-    jwtService = new JwtService();
+    jwtService = new JwtService("test-secret");
   });
 
   it("should generate a token as a non-empty string", () => {

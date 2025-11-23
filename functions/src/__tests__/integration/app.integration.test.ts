@@ -34,9 +34,7 @@ class InMemoryTaskRepository implements ITaskRepository {
   private tasks = new Map<string, Task>();
 
   async getByUserEmail(email: string): Promise<Task[]> {
-    return Array.from(this.tasks.values()).filter(
-      (t) => t.userId === email
-    );
+    return Array.from(this.tasks.values()).filter((t) => t.userId === email);
   }
 
   async getById(id: string): Promise<Task | null> {
@@ -75,13 +73,17 @@ class InMemoryTaskRepository implements ITaskRepository {
 }
 
 describe("Integration: auth + tasks", () => {
-  const userRepo = new InMemoryUserRepository();
-  const taskRepo = new InMemoryTaskRepository();
-  const userService = new UserService(userRepo);
-  const taskService = new TaskService(taskRepo);
-  const jwtService = new JwtService();
+  let app: ReturnType<typeof createApp>;
 
-  const app = createApp(userService, taskService, jwtService);
+  beforeEach(() => {
+    const userRepo = new InMemoryUserRepository();
+    const taskRepo = new InMemoryTaskRepository();
+    const userService = new UserService(userRepo);
+    const taskService = new TaskService(taskRepo);
+    const jwtService = new JwtService("test-secret");
+
+    app = createApp(userService, taskService, jwtService);
+  });
 
   it("should register a user, create a task and list tasks using JWT", async () => {
     const email = "integration@test.com";

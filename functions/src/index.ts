@@ -1,4 +1,5 @@
 // functions/src/index.ts
+import "dotenv/config";
 import * as functions from "firebase-functions";
 import { createApp } from "./infrastructure/http/app";
 
@@ -17,4 +18,8 @@ const jwtService = new JwtService();
 
 const app = createApp(userService, taskService, jwtService);
 
-export const api = functions.https.onRequest(app);
+export const api = functions
+  .runWith({
+    secrets: ["JWT_SECRET"],
+  })
+  .https.onRequest(app);

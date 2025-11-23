@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 export interface JwtPayload {
   email: string;
@@ -10,7 +11,12 @@ export class JwtService {
   private readonly secret: string;
 
   constructor(secret?: string) {
-    this.secret = secret || process.env.JWT_SECRET || "dev-secret-change-me";
+    this.secret =
+      secret ||
+      process.env.JWT_SECRET ||
+      (() => {
+        throw new Error("JWT_SECRET is not defined");
+      })();
   }
 
   generateToken(email: string): string {

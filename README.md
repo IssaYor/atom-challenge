@@ -4,16 +4,6 @@ Backend del desafío técnico desarrollado con **Node.js + TypeScript** usando *
 
 ---
 
-## Contenido
-
-1. [Descripción](#-descripción)
-2. [Tech Stack](#-tech-stack)
-3. [Arquitectura](#-arquitectura)
-4. [CI/CD](#-cicd)
-5. [Ejemplo de Uso](#-ejemplo-de-uso)
-
----
-
 ## Descripción
 
 La API expone endpoints para:
@@ -69,3 +59,53 @@ Además, se aplica **Singleton/Composition Root** en `src/index.ts`:
 
 ```ts
 export const api = functions.https.onRequest(app);
+```
+
+---
+
+## 🔒 Manejo seguro de JWT_SECRET
+
+### Producción (Firebase Functions)
+
+- No se sube el archivo `.env` al repositorio.
+- Configura el secreto con el siguiente comando:
+
+```bash
+firebase functions:config:set jwt.secret="tu_secreto_super_seguro"
+```
+
+- Accede al secreto en tu código con `process.env.JWT_SECRET`.
+
+### Desarrollo Local
+
+- Configura el secreto en tu archivo `functions/.env`:
+
+```env
+JWT_SECRET=dev-secret
+```
+
+### Testing
+
+- Configura el secreto en tu código de test:
+
+```ts
+const jwtService = new JwtService("test-secret");
+```
+- Esto asegura que los tests sean deterministas y no dependan de process.env.
+
+---
+
+## 🔄 CI/CD
+
+El proyecto implementa un pipeline completo utilizando GitHub Actions, ejecutandose en cada push a `main`.
+
+### Pasos principales del workflow:
+1. **Checkout del código**: Se clona el repositorio en el runner.
+2. **Instalación de Node.js + Firebase Tools**: Configuración del entorno necesario.
+3. **Autenticación en Google Cloud**: Uso de una Service Account (JSON almacenado en GitHub Secrets).
+4. **Instalación de dependencias**: Ejecución de `npm install`.
+5. **Ejecución de testing**: Pruebas unitarias e integrales con Jest y Supertest.
+6. **Build de la función**: Compilación del código TypeScript con `tsc`.
+7. **Deploy automático a Firebase Functions**: Despliegue de las funciones a Firebase.
+
+---
