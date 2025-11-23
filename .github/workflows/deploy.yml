@@ -4,31 +4,51 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
-  deploy:
-    name: Deploy to Firebase
+  tests:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: "20"
 
-      - name: Install Firebase Tools
-        run: npm install -g firebase-tools
-
-      - name: Configure Google Cloud Credentials
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      - name: Install dependencies
         run: |
-          echo "$GCP_SA_KEY" > $HOME/gcloud-key.json
-          gcloud auth activate-service-account --key-file=$HOME/gcloud-key.json
-          gcloud config set project challenge-atom-5b851
+          cd functions
+          npm install
+
+      - name: Run tests
+        run: |
+          cd functions
+          npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
 
       - name: Install dependencies
         run: |
