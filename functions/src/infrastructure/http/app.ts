@@ -19,7 +19,7 @@ export function createApp(
   const authMiddleware = createAuthMiddleware(jwtService);
 
   app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok" });
+    res.json({ status: "ok" , version: "1.0.0"});
   });
   app.use("/api/auth", createAuthRouter(userService, jwtService));
   app.use("/api/tasks", authMiddleware, createTaskRouter(taskService));
